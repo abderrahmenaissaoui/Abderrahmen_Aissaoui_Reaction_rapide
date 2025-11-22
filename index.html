@@ -5,17 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Réaction rapide</title>
 </head>
+<style>
+    body{
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+    }
+    #test-container{
+        background-color: #0077b6;
+        width: 80%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        margin: 0 auto;
+        min-height: 300px;
+        gap: 1.20em;
+        color: whitesmoke;
+        font-size: 2em;
+    }
+    #start{
+        border-radius: 0.5em;
+        background: linear-gradient(90deg, #ff007f, #ff7a00);
+        padding: 1em 2em;
+    }
+</style>
 <body>
     <h1>Temps De Réaction Test ⚡</h1>
     <div id="test-container">
         <div class="instruction">
             <span>Lorsque la boîte </span>
-            <span style="color:#f00;font-size:25px">■</span>
+            <span style="color:#f00;font-size:1.5em">■</span>
             <span>Rouge devient </span>
-            <span style="color:#04b962;font-size:25px">■</span>
+            <span style="color:#04b962;font-size:1.5em">■</span>
             <span>Verte, cliquez aussi vite que possible<br></span>
-            <button id="start">CLIQUEZ POUR COMMENCER</button>
         </div>
+        <button id="start">CLIQUEZ POUR COMMENCER</button>
     </div>
     <div id="statistics">
         <div id="score">
@@ -23,20 +50,20 @@
             <h5>Votre meilleur temps</h5>
         </div>
         <div id="niveaux">
-            <p>❌ Débutant: <br>
+            <p>❌ Débutant: 
                 400 ms et plus <br><br>
 
-                ❌ Intermédiaire: <br><br>
-                300-399ms
+                ❌ Intermédiaire: 
+                300-399ms<br><br>
 
                 ❌ Avancé:
-                200-299ms
+                200-299ms<br><br>
 
                 ❌ Professionnel:
-                150-199ms
+                150-199ms<br><br>
 
                 ❌ Élite:
-                0-149ms
+                0-149ms<br><br>
             </p>
 
     </div>
