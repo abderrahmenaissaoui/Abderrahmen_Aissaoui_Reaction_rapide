@@ -13,20 +13,22 @@
       margin: 0;
     }
     #test-container {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
       background-color: #0077b6;
-      width: auto;
+      width: 100%;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       text-align: center;
       margin: 0;
+      min-height: 300px;
       gap: 1.2em;
       color: whitesmoke;
       padding: 2em 2em;
       font-size: 2em;
       margin-bottom: 1em;
-      min-height: 625px;
     }
     #start {
       border-radius: 0.5em;
@@ -61,9 +63,7 @@
     #personal-score {
       background-color: #e5e5e5;
       width: 100%;
-      height: 200px;
-      min-height: 20px;
-      overflow: visible;
+      height: 50%;
       border-radius: 1em;
     }
     #niveaux {
@@ -109,17 +109,13 @@
 
     @media (max-width: 768px){
          #test-container {
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            text-align: center;
             gap: 1.2em;
             color: whitesmoke;
             padding: 2em 2em;
             font-size: 1.5em;
             margin-bottom: 1em;
-            width: auto;
         }
-        #stats{
+                #stats{
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -136,10 +132,6 @@
             margin-top: 0.5em;
             font-size: 0.8em;
         }
-        .info > div {
-            min-width: auto; 
-        }
-
     }
   </style>
   <body>
@@ -183,39 +175,5 @@
       <button>Clic de souris</button><br />
       <button>Appui sur la barre d'espace</button>
     </div>
-    <script>
-        testButton=document.getElementById("start");
-        const testContainer = document.getElementById("test-container");
-        let startTime;
-        let timeout;
-        testButton.addEventListener("click",function(){
-            document.querySelector(".instruction").style.display = "none";
-            testContainer.style.background = "red";
-            testContainer.innerHTML = "<h2>Attendez le VERT</h2>";
-            testContainer.style.cursor = "pointer";
-
-            //temps aléatoire entre 1 et 5
-            const randomTime = Math.random()*5000 + 1000;
-
-            timeout = setTimeout(function(){
-                testContainer.style.backgroundColor = "#04b926";
-                testContainer.innerHTML = "<h2>CLIQUEZ MAINTENANT!</h2>";
-                // testContainer.style.cursor = "pointer";
-                startTime = Date.now();
-
-                //ajouter l'événement de clic sur le container
-                testContainer.addEventListener("click",afterReaction)
-            },randomTime);
-        });
-        function afterReaction(){
-            const reactionTime = Date.now() - startTime;
-
-            //Afficher le résultat
-            testContainer.style.backgroundColor = "#0077b6"
-            testContainer.innerHTML = `<h2>Votre temps: ${reactionTime} ms</h2><button id="retry" style="border-radius: 0.5em; background: linear-gradient(90deg, #c9f1ff, #8ed8f8); color: #003b5c; padding: 1em 2em; border: none; margin-top: 1em; font-size: 1em; cursor: pointer;">RÉESSAYER</button>`;
-            testContainer.style.cursor = "default";
-        }
-    </script>
-    <h2>Votre temps: ${reactionTime}</h2>
   </body>
 </html>
