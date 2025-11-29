@@ -50,13 +50,15 @@
       border-radius: 1em;
       min-height: 350px;
       min-width: 300px;
+      width: 30%;
     }
 
     #stats {
       display: flex;
       flex-direction: row;
       justify-content: center;
-      gap: 3em;
+      width:90%;
+      gap: 5em;
     }
     #personal-score {
       background-color: #e5e5e5;
@@ -71,6 +73,10 @@
       display: flex;
       align-items: center;
     }
+    .emojie{
+      padding-left: 2em;
+      font-size: 2em;
+    }
     .flash {
       margin-bottom: 0.5em;
       display: inline-block;
@@ -81,7 +87,7 @@
       background-color: white;
       padding-top: 0.5em;
       border-radius: 1em;
-      width: 47.5%;
+      width: 68%;
       margin: 2em auto;
       min-height: 300px;
       font-size: 1.2em;
@@ -94,6 +100,14 @@
       background: linear-gradient(90deg, #c9f1ff, #8ed8f8);
       font-size: 1em;
       padding: 0.8em 1.6em;
+    }
+    #settings > button.active-mode {
+      background: linear-gradient(90deg, #04b926, #038a1e);
+      color: white;
+      font-size: 1.3em;
+      padding: 1em 2em;
+      font-weight: bold;
+      box-shadow: 0 6px 20px rgba(4, 185, 38, 0.4);
     }
     button {
       cursor: pointer;
@@ -123,7 +137,19 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            width: 100%
         }
+         #stats > div {  /* ← Ajouter cette règle */
+          width: 70%;
+          min-width: auto;
+        }
+
+        #personal-score{
+          font-size: 0.95em;
+          padding-top:0em;
+          padding-bottom: 1em;
+        }
+
         #settings {
             width: 90%;
         }
@@ -139,7 +165,15 @@
         .info > div {
             min-width: auto; 
         }
-
+        #settings > button.active-mode{
+          font-size: 1em;
+        }
+       #niveaux {
+        padding-left:2.8em;
+        padding-right:2.8em;
+        font-size: 0.758em;
+        margin-bottom: 4em;
+      }
     }
   </style>
   <body>
@@ -165,56 +199,281 @@
       </div>
       <div id="niveaux">
         <p>
-          ❌ Débutant: 400 ms et plus <br /><br />
+          ❌ Débutant: 400 ms et plus <span class="emojie">🐢</span><br /><br />
 
-          ❌ Intermédiaire: 300-399ms<br /><br />
+          ❌ Intermédiaire: 300-399ms<span class="emojie">🎯</span><br /><br />
 
-          ❌ Avancé: 200-299ms<br /><br />
+          ❌ Avancé: 200-299ms<span class="emojie">🚀</span><br /><br />
 
-          ❌ Professionnel: 150-199ms<br /><br />
+          ❌ Professionnel: 150-199ms<span class="emojie">🏆</span><br /><br />
 
-          ❌ Élite: 0-149ms<br /><br />
+          ❌ Élite: 0-149ms<span class="emojie">👑</span><br /><br />
         </p>
       </div>
     </div>
     <div class="info" id="settings">
       <h3>Paramètres ⚙️</h3>
       <h5>Méthode d'entrée</h5>
-      <button>Clic de souris</button><br />
-      <button>Appui sur la barre d'espace</button>
+      <button id="souris">Clic de souris</button><br />
+      <button id="espace">Appui sur la barre d'espace</button>
     </div>
     <script>
-        testButton=document.getElementById("start");
+        const testButton=document.getElementById("start");
         const testContainer = document.getElementById("test-container");
+        const personalScore = document.getElementById("personal-score");
+        const mouseButton = document.getElementById("souris");
+        const spaceButton = document.getElementById("espace");
+        let bestScore = localStorage.getItem('bestScore');
         let startTime;
         let timeout;
-        testButton.addEventListener("click",function(){
+        let inputMode;
+        let canClick = false;
+
+        if(localStorage.getItem("inputMode")){
+          inputMode = localStorage.getItem("inputMode");
+        }
+        else{
+          inputMode = "mouse";
+        }
+
+         
+        if(inputMode === "mouse"){
+          mouseButton.classList.add("active-mode");
+          spaceButton.classList.remove("active-mode");
+        }
+        else{
+          spaceButton.classList.add("active-mode");
+          mouseButton.classList.remove("active-mode");
+        }
+
+        if(bestScore){
+          if(bestScore>400)
+          {
+            personalScore.innerHTML = `
+            <h1 style="color: #5a6c7d; padding-top: 2em;">${bestScore} ms -> Débutant 🐢</h1>
+            `;
+          }
+          else if(bestScore >= 300 && bestScore < 400)
+          {
+            personalScore.innerHTML = `
+            <h1 style="color: #5a6c7d; padding-top: 2em;">${bestScore} ms -> Intermédiare 🎯</h1>
+            `;
+          }
+          else if(bestScore >= 200 && bestScore < 300)
+          {
+            personalScore.innerHTML = `
+            <h1 style="color: #5a6c7d; padding-top: 2em;">${bestScore} ms -> Avancé 🚀</h1>
+            `;
+          }
+          else if(bestScore >= 150 && bestScore < 200)
+          {
+            personalScore.innerHTML = `
+            <h1 style="color: #5a6c7d; padding-top: 2em;">${bestScore} ms -> Professionnel 🏆</h1>
+            `;
+          }
+          else {
+            personalScore.innerHTML = `
+            <h1 style="color: #5a6c7d; padding-top: 2em;">${bestScore} ms -> Élite 👑</h1>
+            `;
+          }
+        }
+
+        //mode souris
+        testButton.addEventListener("click",startTest)
+
+        //mode clavier
+        document.addEventListener("keydown",function(e){
+          if(inputMode === "keyboard" && e.code ==="Space")
+          {
+            e.preventDefault()
+            if(testButton.style.display !== "none"){
+              startTest();
+            }
+          }
+        });
+
+        function startTest(){
+            canClick = false;
             document.querySelector(".instruction").style.display = "none";
             testContainer.style.background = "red";
             testContainer.innerHTML = "<h2>Attendez le VERT</h2>";
             testContainer.style.cursor = "pointer";
+            
 
             //temps aléatoire entre 1 et 5
             const randomTime = Math.random()*5000 + 1000;
 
+            //les événementspour détecter les clics trop tôt
+            if(inputMode === "mouse"){
+              // testContainer.addEventListener("click", checkEarly);
+              setTimeout(() => {
+                document.addEventListener("keydown", checkEarlySpace);
+            }, 50);
+
+            } else {
+              document.addEventListener("keydown", checkEarlySpace);
+            }
+
             timeout = setTimeout(function(){
                 testContainer.style.backgroundColor = "#04b926";
                 testContainer.innerHTML = "<h2>CLIQUEZ MAINTENANT!</h2>";
-                // testContainer.style.cursor = "pointer";
                 startTime = Date.now();
 
-                //ajouter l'événement de clic sur le container
-                testContainer.addEventListener("click",afterReaction)
+                //ajouter l'événement de clic/espace sur le container
+                if(inputMode==="mouse")
+                {
+                  testContainer.addEventListener("click",afterReaction);
+                }
+                else{
+                  document.addEventListener("keydown",spaceReaction);
+                }
             },randomTime);
-        });
+        };
+
+        function checkEarly(){
+          if(!canClick){
+            clearTimeout(timeout);
+            testContainer.style.backgroundColor = "#ff4444";
+            testContainer.innerHTML = `
+              <h2>❌ TROP TÔT !</h2>
+              <p>Vous avez cliqué avant que la boîte ne devienne verte</p>
+              <button id="retry" style="border-radius: 0.5em; background: linear-gradient(90deg, #c9f1ff, #8ed8f8); color: #003b5c; padding: 1em 2em; border: none; margin-top: 1em; font-size: 1em; cursor: pointer;">RÉESSAYER</button>
+            `;
+            testContainer.removeEventListener("click",checkEarly);
+             document.getElementById("retry").addEventListener("click", function() {
+                location.reload();
+          });
+        }
+      }
+
+        function checkEarlySpace(e){
+          if(e.code === "Space" && !canClick){
+            e.preventDefault();
+            clearTimeout(timeout);
+            testContainer.style.backgroundColor = "#ff4444";
+            testContainer.innerHTML = `
+              <h2>❌ TROP TÔT !</h2>
+              <p>Vous avez appuyé sur Espace avant que la boîte ne devienne verte</p>
+              <button id="retry" style="border-radius: 0.5em; background: linear-gradient(90deg, #c9f1ff, #8ed8f8); color: #003b5c; padding: 1em 2em; border: none; margin-top: 1em; font-size: 1em; cursor: pointer;">RÉESSAYER</button>
+            `;
+            document.removeEventListener("keydown", checkEarlySpace);
+            document.getElementById("retry").addEventListener("click", function() {
+              location.reload();
+            });
+          }
+        }
+
+        //reaction de l'espace
+        function spaceReaction(e){
+          if(e.code === "Space"){
+            e.preventDefault();
+            document.removeEventListener('keydown', spaceReaction);
+            afterReaction();
+          }
+        }
+
+        //reaction
         function afterReaction(){
+            canClick=true;
             const reactionTime = Date.now() - startTime;
+            if(bestScore === null || parseInt(bestScore) > reactionTime){
+              localStorage.setItem('bestScore',reactionTime);
+              bestScore = reactionTime;
+
+               personalScore.innerHTML = `
+                    <h1 style="color: #04b962; padding-top: 1em;">🎉 ${reactionTime} ms</h1>
+                    <p style="color: #04b962; font-weight: bold;">NOUVEAU RECORD PERSONNEL !</p>
+                `;
+            }
+            else{
+              personalScore.innerHTML = `
+            <h1 style="color: #0077b6; padding-top: 2em;">${bestScore} ms</h1>
+            `;
+            }
 
             //Afficher le résultat
-            testContainer.style.backgroundColor = "#0077b6"
-            testContainer.innerHTML = `<h2>Votre temps: ${reactionTime} ms</h2><button id="retry" style="border-radius: 0.5em; background: linear-gradient(90deg, #c9f1ff, #8ed8f8); color: #003b5c; padding: 1em 2em; border: none; margin-top: 1em; font-size: 1em; cursor: pointer;">RÉESSAYER</button>`;
+            testContainer.style.backgroundColor = "#0077b6";
+            testContainer.innerHTML = ``
+             // Vérifier le niveau selon le temps de réaction
+            if(reactionTime > 400)
+            {
+              testContainer.innerHTML=`<h2>⏳ Votre temps: ${reactionTime} ms</h2>
+            <h3>Vous pouvez faire mieux ! 🐢</h3>
+            <p>Pas le départ le plus rapide, mais ne vous inquiétez pas —
+            les réflexes s'améliorent avec la pratique. Continuez à vous entraîner et vous serez bientôt un éclair ! ⚡
+            </p>
+            <button id="retry" style=
+            "border-radius: 0.5em;
+            background: linear-gradient(90deg, #c9f1ff, #8ed8f8);
+            color: #003b5c;
+            padding: 1em 2em;
+            border: none;
+            margin-top: 1em;
+            font-size: 1em;
+            cursor: pointer;">
+            RÉESSAYER
+            </button>
+              `;
+            }
+              else if(reactionTime >= 300 && reactionTime < 400) {
+                // Intermédiaire
+                testContainer.innerHTML = `<h2>⚡ Votre temps: ${reactionTime} ms</h2>
+                <h3>Pas mal ! 🎯</h3>
+                <p>Vous êtes au niveau intermédiaire ! Vos réflexes sont corrects, 
+                mais il y a encore de la marge pour progresser. Continuez comme ça ! 💪
+                </p>
+                <button id="retry" style="border-radius: 0.5em; background: linear-gradient(90deg, #c9f1ff, #8ed8f8); color: #003b5c; padding: 1em 2em; border: none; margin-top: 1em; font-size: 1em; cursor: pointer;">RÉESSAYER</button>`;
+            }
+            else if(reactionTime >= 200 && reactionTime < 300) {
+                // Avancé
+                testContainer.innerHTML = `<h2>⚡⚡ Votre temps: ${reactionTime} ms</h2>
+                <h3>Excellent ! 🚀</h3>
+                <p>Vous êtes au niveau avancé ! Vos réflexes sont impressionnants. 
+                Vous êtes rapide et précis. Encore un petit effort pour atteindre le niveau professionnel ! 🔥
+                </p>
+                <button id="retry" style="border-radius: 0.5em; background: linear-gradient(90deg, #c9f1ff, #8ed8f8); color: #003b5c; padding: 1em 2em; border: none; margin-top: 1em; font-size: 1em; cursor: pointer;">RÉESSAYER</button>`;
+            }
+            else if(reactionTime >= 150 && reactionTime < 200) {
+                // Professionnel
+                testContainer.innerHTML = `<h2>⚡⚡⚡ Votre temps: ${reactionTime} ms</h2>
+                <h3>Incroyable ! 🏆</h3>
+                <p>Vous êtes au niveau professionnel ! Vos réflexes sont d'une rapidité exceptionnelle. 
+                Vous faites partie des meilleurs ! Pouvez-vous atteindre le niveau élite ? 👑
+                </p>
+                <button id="retry" style="border-radius: 0.5em; background: linear-gradient(90deg, #c9f1ff, #8ed8f8); color: #003b5c; padding: 1em 2em; border: none; margin-top: 1em; font-size: 1em; cursor: pointer;">RÉESSAYER</button>`;
+            }
+            else {
+                // Élite (0-149ms)
+                testContainer.innerHTML = `<h2>⚡⚡⚡⚡ Votre temps: ${reactionTime} ms</h2>
+                <h3>LÉGENDAIRE ! 👑</h3>
+                <p>Vous êtes au niveau ÉLITE ! Vos réflexes sont absolument extraordinaires ! 
+                Vous faites partie de l'élite mondiale. Félicitations, champion ! 🎉🏆
+                </p>
+                <button id="retry" style="border-radius: 0.5em; background: linear-gradient(90deg, #c9f1ff, #8ed8f8); color: #003b5c; padding: 1em 2em; border: none; margin-top: 1em; font-size: 1em; cursor: pointer;">RÉESSAYER</button>`;
+            }
+    
             testContainer.style.cursor = "default";
+            testContainer.removeEventListener("click",afterReaction);
+            // Ajouter l'événement au bouton réessayer
+            document.getElementById("retry").addEventListener("click", function() {
+             location.reload();
+            });
         }
+        
+        mouseButton.addEventListener("click",function(){
+          inputMode = "mouse";
+          localStorage.setItem("inputMode","mouse");
+          mouseButton.classList.add("active-mode");
+          spaceButton.classList.remove("active-mode");
+        })
+
+         spaceButton.addEventListener("click",function(){
+          inputMode = "keyboard";
+          localStorage.setItem("inputMode","keyboard");
+          spaceButton.classList.add("active-mode");
+          mouseButton.classList.remove("active-mode");
+        })
+
     </script>
   </body>
 </html>
