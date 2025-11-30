@@ -137,9 +137,9 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 100%
+            width: 100%;
         }
-         #stats > div {  /* ← Ajouter cette règle */
+         #stats > div { 
           width: 70%;
           min-width: auto;
         }
@@ -177,26 +177,31 @@
     }
   </style>
   <body>
+    <!-- conteur du test. -->
     <div id="test-container">
       <div class="instruction">
         <h1>
           <span class="flash">⚡</span> <br />
           Temps De Réaction Test
         </h1>
+        <!-- Instructions -->
         <span>Lorsque la boîte </span>
         <span style="color: #f00; font-size: 1.5em">■</span>
         <span>Rouge devient </span>
         <span style="color: #04b962; font-size: 1.5em">■</span>
         <span>Verte, cliquez aussi vite que possible<br /></span>
       </div>
+      <!-- start button  -->
       <button id="start">CLIQUEZ POUR COMMENCER</button>
     </div>
+    <!-- score personnel -->
     <div class="info" id="stats">
       <div id="score">
         <h3>Meilleure performance 🏆</h3>
         <h5>Votre meilleur temps</h5>
         <div id="personal-score"></div>
       </div>
+      <!-- les niveaux par rapport au score -->
       <div id="niveaux">
         <p>
           ❌ Débutant: 400 ms et plus <span class="emojie">🐢</span><br /><br />
@@ -211,6 +216,7 @@
         </p>
       </div>
     </div>
+    <!-- paramètres d'entrée -->
     <div class="info" id="settings">
       <h3>Paramètres ⚙️</h3>
       <h5>Méthode d'entrée</h5>
@@ -218,6 +224,9 @@
       <button id="espace">Appui sur la barre d'espace</button>
     </div>
     <script>
+        // ====================================
+        // INITIALISATION DES VARIABLES
+        // ====================================
         const testButton=document.getElementById("start");
         const testContainer = document.getElementById("test-container");
         const personalScore = document.getElementById("personal-score");
@@ -229,6 +238,10 @@
         let inputMode;
         let canClick = false;
 
+        // =======================================
+        // CHARGEMENT DU MODE D'ENTRÉE SAUVEGARDÉ
+        // =======================================
+
         if(localStorage.getItem("inputMode")){
           inputMode = localStorage.getItem("inputMode");
         }
@@ -236,7 +249,7 @@
           inputMode = "mouse";
         }
 
-         
+        //ajouter du style selon le mode d'entrée
         if(inputMode === "mouse"){
           mouseButton.classList.add("active-mode");
           spaceButton.classList.remove("active-mode");
@@ -246,6 +259,7 @@
           mouseButton.classList.remove("active-mode");
         }
 
+        //affichage du score sauvgardé ainsi que le niveau acquis
         if(bestScore){
           if(bestScore>400)
           {
@@ -278,13 +292,16 @@
           }
         }
 
-        //mode souris
+        //Lancement du jeu dans le mode souris
         testButton.addEventListener("click",startTest)
 
-        //mode clavier
+        //Lancement du jeu dans le mode clavier
+        //code plus dévelopé que celui du mode souris car le clavier a beaucoup de buttons
+        //donc il faut  qu'on filtre l'appui sur l'espace
         document.addEventListener("keydown",function(e){
           if(inputMode === "keyboard" && e.code ==="Space")
           {
+            //pour échapper le fonctionnement normal de l'espace (décendre dans la page web)
             e.preventDefault()
             if(testButton.style.display !== "none"){
               startTest();
@@ -303,18 +320,46 @@
             //temps aléatoire entre 1 et 5
             const randomTime = Math.random()*5000 + 1000;
 
-            //les événementspour détecter les clics trop tôt
+            //Les événements pour détecter les clics trop tôt
+            //Rq très importante: Délai de 50ms pour éviter que le clic sur le bouton "start" 
+            // ne déclenche immédiatement checkEarly() à cause de la propagation d'événement dans
+            // Timeline RÉELLE quand vous cliquez sur #start :**
+
+            // Temps 0ms : 👆 Clic sur <button id="start">
+            //             ↓
+            // Temps 0.1ms : JavaScript détecte le clic sur #start
+            //             ↓
+            // Temps 0.2ms : startTest() s'exécute
+            //             ↓
+            // Temps 0.3ms : addEventListener("click", checkEarly) est ajouté à #test-container
+            //             ↓
+            // Temps 0.4ms : startTest() se termine
+            //             ↓
+            //             ⚠️ MAINTENANT LA PROPAGATION CONTINUE ⚠️
+            //             ↓
+            // Temps 0.5ms : Le clic REMONTE de <button> vers <div id="test-container">
+            //             ↓
+            // Temps 0.6ms : #test-container reçoit le clic
+            //             ↓
+            // Temps 0.7ms : #test-container voit qu'il a un addEventListener
+            //             ↓
+            // Temps 0.8ms : checkEarly() s'exécute ❌ (TROP TÔT détecté)
+
             if(inputMode === "mouse"){
-              // testContainer.addEventListener("click", checkEarly);
               setTimeout(() => {
-                document.addEventListener("keydown", checkEarlySpace);
+                testContainer.addEventListener("click", checkEarly);
             }, 50);
 
+            //il n'y a pas le même probleme avec l'espace car c'est un click sur le button et non pas un appui sur l'espace 
             } else {
               document.addEventListener("keydown", checkEarlySpace);
             }
 
+            //affichage du couleur verte et attendre pour le click
             timeout = setTimeout(function(){
+                testContainer.removeEventListener("click", checkEarly);
+                document.removeEventListener("keydown", checkEarlySpace);
+                canClick = true;
                 testContainer.style.backgroundColor = "#04b926";
                 testContainer.innerHTML = "<h2>CLIQUEZ MAINTENANT!</h2>";
                 startTime = Date.now();
@@ -330,6 +375,7 @@
             },randomTime);
         };
 
+        //le jeu s'est arrêtée après le click (ou appui sur l'espace) très tôt 
         function checkEarly(){
           if(!canClick){
             clearTimeout(timeout);
@@ -460,6 +506,7 @@
             });
         }
         
+        //Changer l'input mode et ajouter un style d'activation pour le button choisit.
         mouseButton.addEventListener("click",function(){
           inputMode = "mouse";
           localStorage.setItem("inputMode","mouse");
